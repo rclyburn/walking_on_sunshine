@@ -14,15 +14,20 @@ def get_album_length():
 
     sp = spotipy.Spotify(auth_manager=SpotifyClientCredentials(client_id, client_secret))
 
-    album = sp.album("4aawyAB9vmqN3uQ7FjRGTy")
+    search_query = "remaster%20track:Doxy%20artist:Miles%20Davis"
+    album_search = sp.search(search_query, type="album", limit=1)
+    first_result = album_search["albums"]
+
+    album = sp.album(first_result["items"][0]["id"])
+
     item_array = []
 
     for item in album["tracks"]["items"]:
         item_array.append(item)
 
-    while album["tracks"]["next"]:
-        album = sp.next(album)
-        item_array.extend(album["items"])
+    # while album["next"]:
+    #     album = sp.next(album)
+    #     item_array.extend(album["items"])
 
     for item in item_array:
         song_name = item["name"]
