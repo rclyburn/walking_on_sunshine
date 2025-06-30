@@ -25,6 +25,9 @@ def _ms_to_hhmmss(duration: int) -> str:
 
 
 def _format_album_name(name: str) -> str:
+    """
+    Convert user-entered search to URL-encoded string
+    """
     name.replace(" ", "%20")
     return "album:" + name
 
@@ -43,22 +46,31 @@ def get_album_length(album_name):
 
     album = sp.album_tracks(first_result["items"][0]["id"])
 
-    item_array = []
+    tracks = []
 
-    for item in album["items"]:
-        item_array.append(item)
+    tracks.extend(album["items"])
 
-    # while album["next"]:
-    #     album = sp.next(album)
-    #     item_array.extend(album["items"])
+    # print(album["tracks"]["next"])
+
+    while album["next"]:
+        # pprint(album["next"])
+        album = sp.next(album)
+
+        tracks.extend(album["items"])
+
+    # pprint(tracks[-1])
 
     album_duration = 0
 
-    for item in item_array:
+    song_number = 0
+
+    for item in tracks:
         song_name = item["name"]
         duration = item["duration_ms"]
-        album_duration += duration
 
-        print(f"Song name: {song_name}")
+        album_duration += duration
+        song_number += 1
+
+        print(f"{song_number} Song name: {song_name}")
 
     print(_ms_to_hhmmss(album_duration))
