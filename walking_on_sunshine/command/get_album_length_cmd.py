@@ -19,9 +19,9 @@ def _ms_to_hhmmss(duration: int) -> str:
     seconds = miliseconds // 1000
 
     if hours > 0:
-        return f"Album Duration: {hours:02.0f}:{minutes_remainder:02.0f}:{seconds:05.2f}"
+        return f"Album Duration: {hours:02.0f}:{minutes_remainder:02.0f}:{seconds:02.0f}"
     else:
-        return f"Album Duration: {minutes:02.0f}:{seconds:05.2f}"
+        return f"Album Duration: {minutes:02.0f}:{seconds:02.0f}"
 
 
 def _format_album_name(name: str) -> str:
@@ -42,27 +42,28 @@ def get_album_length(album_name):
 
     search_query = _format_album_name(album_name)
     album_search = sp.search(search_query, type="album", limit=1)
-    first_result = album_search["albums"]
+    albums_in_search = album_search["albums"]
+    first_result = albums_in_search["items"][0]
+    album_id = first_result["id"]
 
-    album = sp.album_tracks(first_result["items"][0]["id"])
+    album_tracks = sp.album_tracks(album_id)
+    album = sp.album(album_id)
+    album_name = album["name"]
 
     tracks = []
 
-    tracks.extend(album["items"])
+    tracks.extend(album_tracks["items"])
 
-    # print(album["tracks"]["next"])
+    while album_tracks["next"]:
+        album_tracks = sp.next(album_tracks)
 
-    while album["next"]:
-        # pprint(album["next"])
-        album = sp.next(album)
-
-        tracks.extend(album["items"])
-
-    # pprint(tracks[-1])
+        tracks.extend(album_tracks["items"])
 
     album_duration = 0
 
     song_number = 0
+
+    print(f"Album name: {album_name}")
 
     for item in tracks:
         song_name = item["name"]
@@ -73,4 +74,6 @@ def get_album_length(album_name):
 
         print(f"{song_number} Song name: {song_name}")
 
-    print(_ms_to_hhmmss(album_duration))
+    formatted_duration = _ms_to_hhmmss(album_duration)
+
+    print(f"{formatted_duration}")
