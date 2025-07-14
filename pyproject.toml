@@ -6,6 +6,8 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "click>=8.2.1",
+    "python-dotenv>=1.1.1",
+    "spotipy>=2.25.1",
 ]
 
 [dependency-groups]
@@ -24,3 +26,7 @@ main = "walking_on_sunshine.main:main"
 
 [tool.ruff]
 line-length = 120
+
+[[tool.mypy.overrides]]
+module = ["spotipy.*"]
+ignore_missing_imports = true
