@@ -7,31 +7,47 @@ from spotipy.oauth2 import SpotifyClientCredentials
 from walking_on_sunshine.command.root import root_cmd
 
 
-def _ms_to_hhmmss(duration: int) -> str:
+def time_format(duration: int) -> str:
     """
     Convert a duration in milliseconds to a formatted string.
     Returns "Album Duration: HH:MM:SS" if hours > 0, else "Album Duration: MM:SS".
     """
-    minutes = duration // 60000
-    minutes_remainder = (duration % 60000) // 60000
-    hours = minutes // 60
-    miliseconds = duration % 60000
-    seconds = miliseconds // 1000
+    seconds = duration // 1000
+    h = seconds // 3600
+    m = (seconds % 3600) // 60
+    s = seconds % 60
 
-    if hours > 0:
-        return f"Album Duration: {hours:02.0f}:{minutes_remainder:02.0f}:{seconds:02.0f}"
+    if h > 0:
+        return f"Album Duration: {h:02}:{m:02}:{s:02}"
     else:
-        return f"Album Duration: {minutes:02.0f}:{seconds:02.0f}"
+        return f"Album Duration: {m:02}:{s:02}"
 
 
-def _format_album_name(name: str) -> str:
+def _search_query(spotify_obj, album_name: str) -> str:
     """
-    Convert user-entered album name to a Spotify search query string.
-    Spaces are replaced with '%20' for URL encoding.
+    Return album id of first spotify search result
     """
-    # Replace spaces with '%20' for URL encoding
-    formatted_name = name.replace(" ", "%20")
-    return "album:" + formatted_name
+    search_query = "album:" + album_name
+    album_search = spotify_obj.search(search_query, type="album", limit=1)
+    albums_in_search = album_search["albums"]
+    first_result = albums_in_search["items"][0]
+    return first_result["id"]
+
+
+def _get_tracks(spotify_obj, album_id: str) -> list[str]:
+    """
+    Return list of tracks for a given album id
+    """
+    album_tracks = spotify_obj.album_tracks(album_id)
+    tracks = []
+    tracks.extend(album_tracks["items"])
+
+    while album_tracks["next"]:
+        album_tracks = spotify_obj.next(album_tracks)
+
+        tracks.extend(album_tracks["items"])
+
+    return tracks
 
 
 @root_cmd.command()
@@ -48,32 +64,16 @@ def get_album_length(album_name):
     # Authenticate with Spotify using client credentials
     sp = spotipy.Spotify(auth_manager=SpotifyClientCredentials(client_id, client_secret))
 
-    # Format the search query for the album
-    search_query = _format_album_name(album_name)
-    album_search = sp.search(search_query, type="album", limit=1)
-    albums_in_search = album_search["albums"]
-    first_result = albums_in_search["items"][0]
-    album_id = first_result["id"]
+    album_id = _search_query(sp, album_name=album_name)
 
-    # Fetch album tracks and album details
-    album_tracks = sp.album_tracks(album_id)
-    album = sp.album(album_id)
-    album_name = album["name"]
-
-    tracks = []
-    tracks.extend(album_tracks["items"])
-
-    # If there are more tracks (pagination), fetch them all
-    while album_tracks["next"]:
-        album_tracks = sp.next(album_tracks)
-
-        tracks.extend(album_tracks["items"])
+    tracks = _get_tracks(sp, album_id=album_id)
 
     album_duration = 0
 
     song_number = 0
 
-    print(f"Album name: {album_name}")
+    album = sp.album(album_id)
+    print(f"Album name: {album['name']}")
 
     # Iterate through all tracks, print their names, and sum their durations
     for item in tracks:
@@ -86,5 +86,5 @@ def get_album_length(album_name):
         print(f"{song_number} Song name: {song_name}")
 
     # Format and print the total album duration
-    formatted_duration = _ms_to_hhmmss(album_duration)
+    formatted_duration = time_format(album_duration)
     print(f"{formatted_duration}")
