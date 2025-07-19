@@ -30,8 +30,8 @@ def _format_album_name(name: str) -> str:
     Spaces are replaced with '%20' for URL encoding.
     """
     # Replace spaces with '%20' for URL encoding
-    name.replace(" ", "%20")
-    return "album:" + name
+    formatted_name = name.replace(" ", "%20")
+    return "album:" + formatted_name
 
 
 @root_cmd.command()
