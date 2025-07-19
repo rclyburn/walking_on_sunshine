@@ -1,8 +1,10 @@
-import os
-
 from walking_on_sunshine.command.root import root_cmd
+from walking_on_sunshine.common.logging.logger import get_logger
+
+logger = get_logger(__name__)
 
 
 @root_cmd.command()
 def hello():
-    print(os.getenv("Foo"))
+    logger.info("Hello world")
+    logger.debug("Debug message")
