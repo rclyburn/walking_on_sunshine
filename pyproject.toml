@@ -9,6 +9,7 @@ dependencies = [
     "fastapi>=0.116.1",
     "python-dotenv>=1.1.1",
     "spotipy>=2.25.1",
+    "structlog>=25.4.0",
     "uvicorn>=0.35.0",
 ]
 
@@ -30,5 +31,5 @@ main = "walking_on_sunshine.main:main"
 line-length = 120
 
 [[tool.mypy.overrides]]
-module = ["spotipy.*"]
+module = ["spotipy.*,structlog.*"]
 ignore_missing_imports = true
