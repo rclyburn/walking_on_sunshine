@@ -2,6 +2,7 @@ import os
 
 import click
 import spotipy
+from spotipy import Spotify
 from spotipy.oauth2 import SpotifyClientCredentials
 
 from walking_on_sunshine.command.root import root_cmd
@@ -23,7 +24,7 @@ def time_format(duration: int) -> str:
         return f"Album Duration: {m:02}:{s:02}"
 
 
-def _search_query(spotify_obj, album_name: str) -> str:
+def _search_query(spotify_obj: Spotify, album_name: str) -> str:
     """
     Return album id of first spotify search result
     """
@@ -34,7 +35,7 @@ def _search_query(spotify_obj, album_name: str) -> str:
     return first_result["id"]
 
 
-def _get_tracks(spotify_obj, album_id: str) -> list[str]:
+def _get_tracks(spotify_obj: Spotify, album_id: str) -> list[str]:
     """
     Return list of tracks for a given album id
     """
