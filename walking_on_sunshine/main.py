@@ -1,7 +1,7 @@
 import traceback
 
 from walking_on_sunshine.command.root import root_cmd
-from walking_on_sunshine.common.logging.logger import get_logger, init_logger
+from walking_on_sunshine.common.logging.logger_script import get_logger, init_logger
 
 
 def main():
