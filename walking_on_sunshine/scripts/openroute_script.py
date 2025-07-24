@@ -21,14 +21,6 @@ geocode1 = client.pelias_search(
     validate=False,
 )
 
-geocode2 = client.pelias_search(
-    text="3600 16th St, San Francisco, CA 94114",
-    focus_point=list(reversed(m.location)),
-    validate=False,
-)
-
-# pprint.pprint(geocode)
-
 for result in geocode1["features"]:
     folium.Marker(
         location=list(reversed(result["geometry"]["coordinates"])),
@@ -39,7 +31,6 @@ for result in geocode1["features"]:
 
 coordinates = [
     list(geocode1["features"][0]["geometry"]["coordinates"]),
-    # list(geocode1["features"][0]["geometry"]["coordinates"]),
 ]
 
 
