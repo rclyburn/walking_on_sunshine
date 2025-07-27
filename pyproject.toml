@@ -11,6 +11,7 @@ dependencies = [
     "openrouteservice>=2.3.3",
     "python-dotenv>=1.1.1",
     "spotipy>=2.25.1",
+    "structlog>=25.4.0",
     "uvicorn>=0.35.0",
 ]
 
