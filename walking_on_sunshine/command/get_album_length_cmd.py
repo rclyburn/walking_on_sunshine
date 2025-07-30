@@ -89,4 +89,3 @@ def get_album_length(album_name: str):
     # Format and print the total album duration
     formatted_duration = _time_format(album_duration)
     print(f"{formatted_duration}")
-    # return album_duration
