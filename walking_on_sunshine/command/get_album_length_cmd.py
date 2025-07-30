@@ -35,7 +35,7 @@ def _search_query(spotify_obj: Spotify, album_name: str) -> str:
     return first_result["id"]
 
 
-def _get_tracks(spotify_obj: Spotify, album_id: str) -> list[str]:
+def _get_tracks(spotify_obj: Spotify, album_id: str) -> list[dict]:
     """
     Return list of tracks for a given album id
     """
@@ -89,4 +89,4 @@ def get_album_length(album_name: str):
     # Format and print the total album duration
     formatted_duration = _time_format(album_duration)
     print(f"{formatted_duration}")
-    return album_duration
+    # return album_duration

@@ -4,8 +4,11 @@ from unittest.mock import MagicMock, patch
 import pytest
 from click.testing import CliRunner
 
-from walking_on_sunshine.command.get_album_length_cmd import _get_tracks, _search_query, _time_format, get_album_length
+from walking_on_sunshine.command.get_album_length_cmd import _get_tracks, _search_query, _time_format
 from walking_on_sunshine.command.root import root_cmd
+from walking_on_sunshine.common.logging.logger import get_logger
+
+logger = get_logger(__name__)
 
 
 @pytest.mark.parametrize(
@@ -66,39 +69,32 @@ def test_get_tracks(album_id, mock_response, next_tracks, expected_tracks):
 
 
 @patch("walking_on_sunshine.command.get_album_length_cmd._time_format")
-@patch("walking_on_sunshine.command.get_album_length_cmd._search_query")
 @patch("walking_on_sunshine.command.get_album_length_cmd._get_tracks")
-@patch("walking_on_sunshine.command.get_album_length_cmd.Spotify")
+@patch("walking_on_sunshine.command.get_album_length_cmd._search_query")
+@patch("walking_on_sunshine.command.get_album_length_cmd.spotipy.Spotify")
 @patch("walking_on_sunshine.command.get_album_length_cmd.SpotifyClientCredentials")
-def test_get_album_length(mock_auth, mock_spotify, mock_search_query, mock_get_tracks, mock_time_format, capfd):
-    # Mock the album ID returned from the search query
+def test_get_album_length(mock_auth, mock_spotify, mock_search_query, mock_get_tracks, mock_time_format):
     mock_search_query.return_value = "fake_album_id"
 
     runner = CliRunner()
 
-    # Mock tracks returned
     mock_get_tracks.return_value = [
         {"name": "Track One", "duration_ms": 200000},
         {"name": "Track Two", "duration_ms": 180000},
     ]
 
-    # Mock album data from sp.album()
     mock_sp = MagicMock()
     mock_sp.album.return_value = {"name": "Fake Album"}
     mock_spotify.return_value = mock_sp
 
-    # Mock duration formatter
     mock_time_format.return_value = "Album Duration: 06:20"
 
-    # Set fake env vars
     os.environ["SPOTIFY_CLIENT_ID"] = "dummy_id"
     os.environ["SPOTIFY_CLIENT_SECRET"] = "dummy_secret"
 
-    result = runner.invoke(root_cmd, ["get-album-length", "--album_name", "Fake Album"])
-    print(result)
+    result = runner.invoke(root_cmd, "get-album-length", input="Fake Album")
 
-    # assert result.exit_code == 0
     assert "Album name: Fake Album" in result.output
-    assert "1 Song name: Track A" in result.output
-    assert "2 Song name: Track B" in result.output
-    assert "Album Duration: 06:10" in result.output
+    assert "1 Song name: Track One" in result.output
+    assert "2 Song name: Track Two" in result.output
+    assert "Album Duration: 06:20" in result.output
