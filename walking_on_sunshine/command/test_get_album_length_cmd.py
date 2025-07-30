@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import os
 from unittest.mock import MagicMock, patch
 
@@ -103,15 +102,3 @@ def test_get_album_length(mock_auth, mock_spotify, mock_search_query, mock_get_t
     assert "1 Song name: Track A" in result.output
     assert "2 Song name: Track B" in result.output
     assert "Album Duration: 06:10" in result.output
-=======
-# import pytest
-
-# from walking_on_sunshine.command.get_album_length_cmd import _format_album_name
-
-
-# @pytest.mark.parametrize("test_input,expected", [("hello world", "album:hello%20world"), ("Rumours", "album:Rumours")])
-# def test_format_album_name(test_input, expected):
-#     output = _format_album_name(test_input)
-
-#     assert output == expected
->>>>>>> 9d2ae48 (fixed linting)
