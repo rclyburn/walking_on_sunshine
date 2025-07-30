@@ -23,7 +23,6 @@ logger = get_logger(__name__)
 )
 def test_time_format(test_input, expected):
     output = _time_format(test_input)
-
     assert output == expected
 
 
