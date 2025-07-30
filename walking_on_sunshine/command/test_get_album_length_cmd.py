@@ -1,10 +1,104 @@
-# import pytest
+import os
+from unittest.mock import MagicMock, patch
 
-# from walking_on_sunshine.command.get_album_length_cmd import _format_album_name
+import pytest
+from click.testing import CliRunner
+
+from walking_on_sunshine.command.get_album_length_cmd import _get_tracks, _search_query, _time_format, get_album_length
+from walking_on_sunshine.command.root import root_cmd
 
 
-# @pytest.mark.parametrize("test_input,expected", [("hello world", "album:hello%20world"), ("Rumours", "album:Rumours")])
-# def test_format_album_name(test_input, expected):
-#     output = _format_album_name(test_input)
+@pytest.mark.parametrize(
+    "test_input,expected",
+    [
+        (2873000, "Album Duration: 47:53"),
+        (9257000, "Album Duration: 02:34:17"),
+        (8254000, "Album Duration: 02:17:34"),
+        (0, "Album Duration: 00:00"),
+        (10000, "Album Duration: 00:10"),
+    ],
+)
+def test_time_format(test_input, expected):
+    output = _time_format(test_input)
 
-#     assert output == expected
+    assert output == expected
+
+
+@pytest.mark.parametrize(
+    "album_name, mock_response, expected_id",
+    [
+        ("Test Album 1", {"albums": {"items": [{"id": "album_id_1"}]}}, "album_id_1"),
+        ("Test Album 2", {"albums": {"items": [{"id": "album_id_2"}]}}, "album_id_2"),
+    ],
+)
+def test_search_query(album_name, mock_response, expected_id):
+    mock_sp = MagicMock()
+    mock_sp.search.return_value = mock_response
+    output = _search_query(mock_sp, album_name)
+
+    assert output == expected_id
+
+
+@pytest.mark.parametrize(
+    "album_id, mock_response, next_tracks, expected_tracks",
+    [
+        (
+            "test_album_id_1",
+            {"items": ["track1", "track2", "track3"], "next": None},
+            None,
+            ["track1", "track2", "track3"],
+        ),
+        (
+            "test_album_id_2",
+            {"items": ["track_a", "track_b", "track_c"], "next": "fake_next_id"},
+            {"items": ["track_d", "track_e", "track_f"], "next": None},
+            ["track_a", "track_b", "track_c", "track_d", "track_e", "track_f"],
+        ),
+    ],
+)
+def test_get_tracks(album_id, mock_response, next_tracks, expected_tracks):
+    mock_sp = MagicMock()
+    mock_sp.album_tracks.return_value = mock_response
+    mock_sp.next.return_value = next_tracks
+    output = _get_tracks(mock_sp, album_id)
+
+    assert output == expected_tracks
+
+
+@patch("walking_on_sunshine.command.get_album_length_cmd._time_format")
+@patch("walking_on_sunshine.command.get_album_length_cmd._search_query")
+@patch("walking_on_sunshine.command.get_album_length_cmd._get_tracks")
+@patch("walking_on_sunshine.command.get_album_length_cmd.Spotify")
+@patch("walking_on_sunshine.command.get_album_length_cmd.SpotifyClientCredentials")
+def test_get_album_length(mock_auth, mock_spotify, mock_search_query, mock_get_tracks, mock_time_format, capfd):
+    # Mock the album ID returned from the search query
+    mock_search_query.return_value = "fake_album_id"
+
+    runner = CliRunner()
+
+    # Mock tracks returned
+    mock_get_tracks.return_value = [
+        {"name": "Track One", "duration_ms": 200000},
+        {"name": "Track Two", "duration_ms": 180000},
+    ]
+
+    # Mock album data from sp.album()
+    mock_sp = MagicMock()
+    mock_sp.album.return_value = {"name": "Fake Album"}
+    mock_spotify.return_value = mock_sp
+
+    # Mock duration formatter
+    mock_time_format.return_value = "Album Duration: 06:20"
+
+    # Set fake env vars
+    os.environ["SPOTIFY_CLIENT_ID"] = "dummy_id"
+    os.environ["SPOTIFY_CLIENT_SECRET"] = "dummy_secret"
+
+    result = runner.invoke(root_cmd, ["get-album-length", "--album_name", "Fake Album"])
+    print(result)
+
+    # assert result.exit_code == 0
+    assert "Album name: Fake Album" in result.output
+    assert "1 Song name: Track A" in result.output
+    assert "2 Song name: Track B" in result.output
+    assert "Album Duration: 06:10" in result.output

@@ -8,7 +8,7 @@ from spotipy.oauth2 import SpotifyClientCredentials
 from walking_on_sunshine.command.root import root_cmd
 
 
-def time_format(duration: int) -> str:
+def _time_format(duration: int) -> str:
     """
     Convert a duration in milliseconds to a formatted string.
     Returns "Album Duration: HH:MM:SS" if hours > 0, else "Album Duration: MM:SS".
@@ -53,7 +53,7 @@ def _get_tracks(spotify_obj: Spotify, album_id: str) -> list[str]:
 
 @root_cmd.command()
 @click.option("--album_name", prompt="Please enter your album name")
-def get_album_length(album_name):
+def get_album_length(album_name: str):
     """
     CLI command to fetch and display the total length of a Spotify album.
     Prompts the user for an album name, searches Spotify, and prints each track name and the total album duration.
@@ -87,5 +87,6 @@ def get_album_length(album_name):
         print(f"{song_number} Song name: {song_name}")
 
     # Format and print the total album duration
-    formatted_duration = time_format(album_duration)
+    formatted_duration = _time_format(album_duration)
     print(f"{formatted_duration}")
+    return album_duration
