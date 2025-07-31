@@ -6,9 +6,6 @@ from click.testing import CliRunner
 
 from walking_on_sunshine.command.get_album_length_cmd import _get_tracks, _search_query, _time_format
 from walking_on_sunshine.command.root import root_cmd
-from walking_on_sunshine.common.logging.logger import get_logger
-
-logger = get_logger(__name__)
 
 
 @pytest.mark.parametrize(
