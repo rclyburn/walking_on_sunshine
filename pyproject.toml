@@ -6,6 +6,7 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "click>=8.2.1",
+    "dotenv>=0.9.9",
     "fastapi>=0.116.1",
     "folium>=0.20.0",
     "openrouteservice>=2.3.3",

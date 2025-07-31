@@ -1,12 +1,14 @@
 import os
-import pprint
 import subprocess
 
 import folium
 import openrouteservice
+from dotenv import load_dotenv
+
+load_dotenv()
+
 
 key = os.getenv("OPENROUTE_API_KEY")
-key = str(key)[1:]  # for some reason the key string was returning with an extra ' at the front
 
 
 client = openrouteservice.Client(key=key)  # Specify your personal API key
@@ -39,10 +41,6 @@ for result in geocode1["features"]:
 
 coordinates = [
     list(geocode1["features"][0]["geometry"]["coordinates"]),
-<<<<<<< HEAD
-=======
-    # list(geocode1["features"][0]["geometry"]["coordinates"]),
->>>>>>> f05fd63 (working round trip)
 ]
 
 
@@ -50,7 +48,7 @@ route = client.directions(
     coordinates=coordinates,
     profile="foot-walking",
     format="geojson",
-    instructions=False,
+    instructions=True,
     validate=False,
     options={
         "avoid_features": ["fords", "ferries"],
