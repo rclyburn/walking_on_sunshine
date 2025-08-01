@@ -1,5 +1,6 @@
 import os
 import subprocess
+from pprint import pprint
 
 import folium
 import openrouteservice
@@ -53,12 +54,11 @@ route = client.directions(
     options={
         "avoid_features": ["fords", "ferries"],
         "profile_params": {"weightings": {"green": 1, "quiet": 0}},
-        "round_trip": {
-            "length": 2100,
-            "points": 5,
-        },
+        "round_trip": {"length": 2000, "points": 20},
     },
 )
+
+pprint(route)
 
 folium.PolyLine(locations=[list(reversed(coord)) for coord in route["features"][0]["geometry"]["coordinates"]]).add_to(
     m
