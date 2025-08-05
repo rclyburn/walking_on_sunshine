@@ -5,7 +5,6 @@ from walking_on_sunshine.app.config import Config as AppConfig
 
 
 class RootConfig(BaseSettings):
-    foo: str | None = None
     app: AppConfig | None = None
     api: ApiConfig | None = None
 

@@ -478,10 +478,7 @@ dependencies = [
     { name = "click" },
     { name = "fastapi" },
     { name = "pydantic" },
-<<<<<<< HEAD
     { name = "pydantic-settings" },
-=======
->>>>>>> 73f8311 (class stuff and early configs)
     { name = "python-dotenv" },
     { name = "pyyaml" },
     { name = "spotipy" },
@@ -502,10 +499,7 @@ requires-dist = [
     { name = "click", specifier = ">=8.2.1" },
     { name = "fastapi", specifier = ">=0.116.1" },
     { name = "pydantic", specifier = ">=2.11.7" },
-<<<<<<< HEAD
     { name = "pydantic-settings", specifier = ">=2.10.1" },
-=======
->>>>>>> 73f8311 (class stuff and early configs)
     { name = "python-dotenv", specifier = ">=1.1.1" },
     { name = "pyyaml", specifier = ">=6.0.2" },
     { name = "spotipy", specifier = ">=2.25.1" },
