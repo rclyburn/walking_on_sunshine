@@ -1,6 +1,5 @@
 import click
 
-from walking_on_sunshine.app.app import App
 from walking_on_sunshine.command.root import root_cmd
 from walking_on_sunshine.common.logging.logger import get_logger
 
