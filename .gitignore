@@ -1,6 +1,5 @@
 .env
 .cache
-config.yml
 
 # Python-generated files
 __pycache__/
