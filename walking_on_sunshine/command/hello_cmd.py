@@ -1,6 +1,5 @@
 import click
 
-from walking_on_sunshine.app.app import App
 from walking_on_sunshine.command.root import root_cmd
 from walking_on_sunshine.common.logging.logger import get_logger
 
@@ -13,5 +12,3 @@ def hello(ctx: click.Context):
     root_cfg = ctx.obj["root_cfg"]
     logger.info(root_cfg)
     logger.debug("Debug message")
-
-    app = App(root_cfg.app)
