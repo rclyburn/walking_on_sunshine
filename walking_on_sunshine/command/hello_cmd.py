@@ -13,5 +13,3 @@ def hello(ctx: click.Context):
     root_cfg = ctx.obj["root_cfg"]
     logger.info(root_cfg)
     logger.debug("Debug message")
-
-    app = App(root_cfg.app)
