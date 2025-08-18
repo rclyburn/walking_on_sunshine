@@ -54,11 +54,10 @@ route = client.directions(
     options={
         "avoid_features": ["fords", "ferries"],
         "profile_params": {"weightings": {"green": 1, "quiet": 0}},
-        "round_trip": {"length": 2000, "points": 20},
+        "round_trip": {"length": 2000, "points": 20, "seed": 2},
     },
 )
 
-pprint(route)
 
 folium.PolyLine(locations=[list(reversed(coord)) for coord in route["features"][0]["geometry"]["coordinates"]]).add_to(
     m
