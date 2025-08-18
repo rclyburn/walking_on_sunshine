@@ -1,4 +1,10 @@
+from random import randint
+
 import openrouteservice
+
+from walking_on_sunshine.common.logging.logger import get_logger
+
+logger = get_logger(__name__)
 
 
 class PathGen:
@@ -25,6 +31,8 @@ class PathGen:
         return coord_list
 
     def _get_coords_from_list(self, location: list[float], distance: float) -> list:
+        rand = randint(1, 100000)
+        logger.info(str(rand))
         route = self.client.directions(
             coordinates=location,
             profile="foot-walking",
@@ -33,8 +41,8 @@ class PathGen:
             validate=False,
             options={
                 "avoid_features": ["fords", "ferries"],
-                "profile_params": {"weightings": {"green": 1, "quiet": 0}},
-                "round_trip": {"length": distance, "points": 20},
+                "profile_params": {"weightings": {"green": 0, "quiet": 0}},
+                "round_trip": {"length": distance, "points": 100, "seed": 123234},
             },
         )
 
@@ -75,7 +83,7 @@ class PathGen:
         return url
 
     def _downsample_coords(self, route_coords, max_waypoints=23):
-        if len(route_coords) > max_waypoints + 2:
+        if len(route_coords) > max_waypoints + 1:
             step = len(route_coords) // (max_waypoints + 1)
             sampled_coords = route_coords[::step]
             if route_coords[-1] not in sampled_coords:
@@ -85,7 +93,7 @@ class PathGen:
         return route_coords
 
     def generate_path(self, location: str, album_length: int):
-        walking_speed_kmh = 5.0
+        walking_speed_kmh = 2.5
         distance_km = (album_length / 3_600_000) * walking_speed_kmh
         distance_m = distance_km * 1000
 
