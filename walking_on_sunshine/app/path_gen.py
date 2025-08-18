@@ -1,14 +1,6 @@
-import os
-import subprocess
 from random import randint
 
 import openrouteservice
-
-from walking_on_sunshine.common.logging.logger import get_logger
-
-logger = get_logger(__name__)
-
-import folium
 
 
 class PathGen:
@@ -27,7 +19,7 @@ class PathGen:
             options={
                 "avoid_features": ["fords", "ferries"],
                 "profile_params": {"weightings": {"green": 1, "quiet": 0}},
-                "round_trip": {"length": distance, "points": 20},
+                "round_trip": {"length": distance, "points": 20, "seed": randint(1, 10000)},
             },
         )
 
@@ -43,23 +35,12 @@ class PathGen:
             validate=False,
             options={
                 "avoid_features": ["fords", "ferries"],
-                "profile_params": {"weightings": {"green": 0, "quiet": 0}},
-                "round_trip": {"length": distance, "points": 100, "seed": 3},
+                "profile_params": {"weightings": {"green": 1, "quiet": 0}},
+                "round_trip": {"length": distance, "points": 100, "seed": randint(1, 10000)},
             },
         )
 
         coord_list = list(route["features"][0]["geometry"]["coordinates"])
-
-        folium.PolyLine(
-            locations=[list(reversed(coord)) for coord in route["features"][0]["geometry"]["coordinates"]]
-        ).add_to(m)
-
-        m.save("index.html")
-
-        wsl_path = os.path.abspath("index.html")
-        windows_path = subprocess.check_output(["wslpath", "-w", wsl_path]).decode().strip()
-
-        subprocess.run(["explorer.exe", windows_path])  # opens the map file in the users default browser
         return coord_list
 
     def _addr_to_coords(self, addr: str):
@@ -96,7 +77,7 @@ class PathGen:
         return url
 
     def _downsample_coords(self, route_coords, max_waypoints=23):
-        if len(route_coords) > max_waypoints + 1:
+        if len(route_coords) > max_waypoints + 2:
             step = len(route_coords) // (max_waypoints + 1)
             sampled_coords = route_coords[::step]
             if route_coords[-1] not in sampled_coords:

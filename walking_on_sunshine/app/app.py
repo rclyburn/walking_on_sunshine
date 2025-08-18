@@ -11,9 +11,10 @@ class App:
         self.config = config
 
     def run(self, album_name):
-        album_length = AlbumLength(self.config.SPOTIFY_CLIENT_ID, self.config.SPOTIFY_CLIENT_SECRET)
+        album = AlbumLength(self.config.SPOTIFY_CLIENT_ID, self.config.SPOTIFY_CLIENT_SECRET)
         path_gen = PathGen(self.config.OPENROUTE_API_KEY)
-        album_length = album_length.get_album_length(album_name)
+        album_length = album.get_album_length(album_name)
         link = path_gen.generate_path("4050 17th St San Francisco, CA", album_length)
         print(link)
+        print(album._time_format(album_length))
         return link
