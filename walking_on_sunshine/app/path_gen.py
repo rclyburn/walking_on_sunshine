@@ -1,3 +1,5 @@
+import os
+import subprocess
 from random import randint
 
 import openrouteservice
@@ -47,6 +49,17 @@ class PathGen:
         )
 
         coord_list = list(route["features"][0]["geometry"]["coordinates"])
+
+        folium.PolyLine(
+            locations=[list(reversed(coord)) for coord in route["features"][0]["geometry"]["coordinates"]]
+        ).add_to(m)
+
+        m.save("index.html")
+
+        wsl_path = os.path.abspath("index.html")
+        windows_path = subprocess.check_output(["wslpath", "-w", wsl_path]).decode().strip()
+
+        subprocess.run(["explorer.exe", windows_path])  # opens the map file in the users default browser
         return coord_list
 
     def _addr_to_coords(self, addr: str):
