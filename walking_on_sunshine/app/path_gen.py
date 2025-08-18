@@ -6,6 +6,8 @@ from walking_on_sunshine.common.logging.logger import get_logger
 
 logger = get_logger(__name__)
 
+import folium
+
 
 class PathGen:
     def __init__(self, key: str | None):
@@ -31,8 +33,6 @@ class PathGen:
         return coord_list
 
     def _get_coords_from_list(self, location: list[float], distance: float) -> list:
-        rand = randint(1, 100000)
-        logger.info(str(rand))
         route = self.client.directions(
             coordinates=location,
             profile="foot-walking",
@@ -42,7 +42,7 @@ class PathGen:
             options={
                 "avoid_features": ["fords", "ferries"],
                 "profile_params": {"weightings": {"green": 0, "quiet": 0}},
-                "round_trip": {"length": distance, "points": 100, "seed": 123234},
+                "round_trip": {"length": distance, "points": 100, "seed": 3},
             },
         )
 
