@@ -1,3 +1,4 @@
+
 from random import randint
 
 import openrouteservice
@@ -6,6 +7,7 @@ import openrouteservice
 class PathGen:
     def __init__(self, key: str | None):
         self.client = openrouteservice.Client(key=key)
+
 
     def _get_coords_from_addr(self, location: str, distance: float) -> list:
         coordinates = self._addr_to_coords(location)
@@ -54,7 +56,7 @@ class PathGen:
         ]
 
         return coordinates
-
+      
     def _get_maps_url(self, route_coords: list):
         downsampled_coords = self._downsample_coords(route_coords)
 
