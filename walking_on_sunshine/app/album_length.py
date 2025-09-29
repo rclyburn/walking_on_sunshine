@@ -64,4 +64,3 @@ class AlbumLength:
             album_duration += duration
 
         return album_duration
-
