@@ -8,7 +8,7 @@ from walking_on_sunshine.app.path_gen import PathGen
 
 @pytest.fixture
 def mock_client():
-    with patch("walking_on_sunshine.command.path_gen.openrouteservice.Client") as MockClient:
+    with patch("walking_on_sunshine.app.path_gen.openrouteservice.Client") as MockClient:
         client = MagicMock()
         MockClient.return_value = client
         yield client
@@ -65,8 +65,8 @@ def test_get_maps_url_lat_lon_formatting():
     assert url.rstrip("/").endswith("37.783,-122.403")
 
 
-@patch("walking_on_sunshine.command.path_gen.PathGen._get_coords_from_addr")
-@patch("walking_on_sunshine.command.path_gen.PathGen._get_maps_url")
+@patch("walking_on_sunshine.app.path_gen.PathGen._get_coords_from_addr")
+@patch("walking_on_sunshine.app.path_gen.PathGen._get_maps_url")
 @pytest.mark.parametrize(
     "album_ms,expected_m",
     [
