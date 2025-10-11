@@ -1,6 +1,4 @@
-from walking_on_sunshine.app.album_length import AlbumLength
 from walking_on_sunshine.app.config import Config
-from walking_on_sunshine.app.path_gen import PathGen
 from walking_on_sunshine.common.logging.logger import get_logger
 
 logger = get_logger(__name__)
