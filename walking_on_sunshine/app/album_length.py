@@ -63,6 +63,4 @@ class AlbumLength:
             duration = item["duration_ms"]
             album_duration += duration
 
-        # Format and print the total album duration
-        formatted_duration = self._time_format(album_duration)
-        return formatted_duration
+        return album_duration
