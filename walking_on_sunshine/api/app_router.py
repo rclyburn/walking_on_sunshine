@@ -14,10 +14,12 @@ async def serve_frontend():
 
 
 @router.get("/generate_route")
-async def generate_route(request: Request, album_name: str):
+async def generate_route(request: Request, album_name: str, start_address: str):
+    print(f"Received request with album_name: {album_name}, start_address: {start_address}")
     app = request.state.app
     try:
-        result = app.run(album_name)
+        result = app.run(album_name, start_address)
+        print(f"Success response: {result}")
         return JSONResponse(
             {
                 "status": "success",
@@ -28,6 +30,7 @@ async def generate_route(request: Request, album_name: str):
             }
         )
     except Exception as e:
+        print(f"Error in generate_route: {str(e)}")
         return JSONResponse(
             {
                 "status": "error",
@@ -35,3 +38,22 @@ async def generate_route(request: Request, album_name: str):
             },
             status_code=400,
         )
+
+
+@router.get("/search_albums")
+async def search_albums(request: Request, query: str):
+    app = request.state.app
+    try:
+        albums = app.album_length.sp.search(f"album:{query}", type="album", limit=10)["albums"]["items"]
+        results = [
+            {
+                "id": album["id"],
+                "name": album["name"],
+                "artist": album["artists"][0]["name"],
+                "image": album["images"][0]["url"] if album["images"] else None,
+            }
+            for album in albums
+        ]
+        return JSONResponse({"results": results})
+    except Exception as e:
+        return JSONResponse({"results": [], "error": str(e)}, status_code=400)

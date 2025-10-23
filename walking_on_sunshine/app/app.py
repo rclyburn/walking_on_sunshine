@@ -12,13 +12,13 @@ class App:
         self.album_length = AlbumLength(self.config.SPOTIFY_CLIENT_ID, self.config.SPOTIFY_CLIENT_SECRET)
         self.path_gen = PathGen(self.config.OPENROUTE_API_KEY)
 
-    def run(self, album_name: str):
+    def run(self, album_name: str, start_address: str):
         try:
             length_ms = self.album_length.get_album_length(album_name)
 
             length = self.album_length._time_format(length_ms)
 
-            maps_url = self.path_gen.generate_path("4050 17th St, San Francisco, CA", length_ms)
+            maps_url = self.path_gen.generate_path(start_address, length_ms)
 
             walking_speed_kmh = 2.5
             distance_km = (length_ms / 3_600_000) * walking_speed_kmh

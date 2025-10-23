@@ -22,10 +22,15 @@ class API:
             "frontend/src",
         )
 
+        # Print debug info about static files path
+        static_path = os.path.join(frontend_path, "assets")
+        print(f"Mounting static files from: {static_path}")
+        print(f"Does path exist? {os.path.exists(static_path)}")
+
         # Mount static files
         self.fast_api.mount(
             "/static",
-            StaticFiles(directory=os.path.join(frontend_path, "assets")),
+            StaticFiles(directory=static_path),
             name="static",
         )
 
