@@ -84,22 +84,29 @@ frontend/
 ## API Documentation
 
 ### Album Search Endpoint
-`GET /api/albums/search`
-```json
-{
-  "query": "string",
-  "limit": "number"
-}
-```
+`GET /search_albums?query={query}`
+
+Query Parameters:
+- `query`: Album name to search for (string)
+
+Returns album search results including:
+- Album ID
+- Album Name
+- Artist Name
+- Album Cover Image URL
 
 ### Route Generation Endpoint
-`POST /api/routes/generate`
-```json
-{
-  "album_name": "string",
-  "start_address": "string"
-}
-```
+`GET /generate_route`
+
+Query Parameters:
+- `album_name`: Name of the album (string)
+- `start_address`: Starting location address (string)
+
+Returns:
+- Album name
+- Route length in minutes
+- Distance in kilometers
+- OpenRoute Service map URL
 
 ## Development Workflow
 
@@ -119,13 +126,11 @@ frontend/
 - Static file optimization
 - Environment configuration
 - API key management
-- Cache configuration
 
 ## Performance Considerations
 
 ### Frontend
 - Debounced API calls
-- Cached API responses
 - Optimized asset loading
 - Efficient DOM updates
 
@@ -133,7 +138,6 @@ frontend/
 - Connection pooling
 - Rate limiting
 - Error boundary implementation
-- Response caching
 
 ## Security Measures
 
