@@ -1,3 +1,5 @@
+import os
+
 from walking_on_sunshine.app.album_length import AlbumLength
 from walking_on_sunshine.app.config import Config
 from walking_on_sunshine.app.path_gen import PathGen
@@ -9,8 +11,8 @@ logger = get_logger(__name__)
 class App:
     def __init__(self, config: Config):
         self.config = config
-        self.album_length = AlbumLength(self.config.SPOTIFY_CLIENT_ID, self.config.SPOTIFY_CLIENT_SECRET)
-        self.path_gen = PathGen(self.config.OPENROUTE_API_KEY)
+        self.album_length = AlbumLength(os.getenv("SPOTIFY_CLIENT_ID"), os.getenv("SPOTIFY_CLIENT_SECRET"))
+        self.path_gen = PathGen(os.getenv("OPENROUTE_API_KEY"))
 
     def run(self, album_name: str, start_address: str):
         try:
