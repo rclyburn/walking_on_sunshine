@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Walking on Sunshine</title>
+    <link rel="stylesheet" href="/static/styles/main.css?v=20251021">
+    <link href="https://fonts.googleapis.com/css?family=Inter:400,600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header>
+        <h1>🌞 Walking on Sunshine</h1>
+        <p class="subtitle">Find a walking route that matches your favorite album's length</p>
+    </header>
+    <main>
+        <section class="card search-card">
+            <h2>Search for an Album</h2>
+            <div class="search-form">
+                <div class="dropdown-container">
+                    <input type="text" id="albumSearch" placeholder="Enter album name...">
+                    <div id="albumDropdown" class="dropdown"></div>
+                </div>
+                <input type="text" id="addressSearch" placeholder="Enter starting address...">
+                <button onclick="searchAlbum()">Generate Route</button>
+            </div>
+        </section>
+        <section class="card result-card" id="result" style="display:none;">
+            <!-- Results will be displayed here -->
+        </section>
+    </main>
+    <footer>
+        <p>Made by Reid Clyburn</p>
+    </footer>
+    <script src="/static/scripts/main.js?v=20251021"></script>
+</body>
+</html>

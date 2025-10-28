@@ -8,10 +8,10 @@ class PathGen:
         self.client = openrouteservice.Client(key=key)
 
     def _get_coords_from_addr(self, location: str, distance: float) -> list:
-        coordinates = self._addr_to_coords(location)
+        coordinates = self._addr_to_coords(location)[0]  # Get the first coordinate pair
 
         route = self.client.directions(
-            coordinates=coordinates,
+            coordinates=[coordinates],  # Use as starting point for round trip
             profile="foot-walking",
             format="geojson",
             instructions=True,

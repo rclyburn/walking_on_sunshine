@@ -10,8 +10,9 @@ logger = get_logger(__name__)
 @root_cmd.command()
 @click.pass_context
 @click.option("--album_name", prompt="Please enter your album name")
-def start(ctx: click.Context, album_name: str):
+@click.option("--start_address", prompt="Please enter your starting address")
+def start(ctx: click.Context, album_name: str, start_address: str):
     root_cfg = ctx.obj["root_cfg"]
     app = App(root_cfg.app)
 
-    app.run(album_name)
+    app.run(album_name, start_address)
