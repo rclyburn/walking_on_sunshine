@@ -1,4 +1,5 @@
 import logging
+import os
 from pathlib import Path
 
 import click
@@ -23,15 +24,16 @@ def root_cmd(ctx: click.Context, verbose: bool):
             wrapper_class=structlog.make_filtering_bound_logger(logging.INFO),
         )
 
+    load_dotenv()
+
     root_cfg = RootConfig()
     config_path = Path("config.yml")
 
     if config_path.is_file():
-        with config_path.open() as f:
-            config_obj = yaml.safe_load(f)
-            if config_obj:
-                root_cfg = RootConfig.model_validate(config_obj)
+        # 2) expand ${VAR} using the current environment
+        text = os.path.expandvars(config_path.read_text())
+        config_obj = yaml.safe_load(text)
+        if config_obj:
+            root_cfg = RootConfig.model_validate(config_obj)
 
     ctx.obj["root_cfg"] = root_cfg
-
-    load_dotenv()
