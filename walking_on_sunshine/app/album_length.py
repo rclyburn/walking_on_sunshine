@@ -17,9 +17,9 @@ class AlbumLength:
         s = seconds % 60
 
         if h > 0:
-            return f"Album Duration: {h:02}:{m:02}:{s:02}"
+            return f"{h:02}:{m:02}:{s:02}"
         else:
-            return f"Album Duration: {m:02}:{s:02}"
+            return f"{m:02}:{s:02}"
 
     def _search_query(self, album_name: str) -> str:
         """

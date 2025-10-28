@@ -9,12 +9,28 @@ logger = get_logger(__name__)
 class App:
     def __init__(self, config: Config):
         self.config = config
+        self.album_length = AlbumLength(self.config.SPOTIFY_CLIENT_ID, self.config.SPOTIFY_CLIENT_SECRET)
+        self.path_gen = PathGen(self.config.OPENROUTE_API_KEY)
 
-    def run(self, album_name):
-        album = AlbumLength(self.config.SPOTIFY_CLIENT_ID, self.config.SPOTIFY_CLIENT_SECRET)
-        path_gen = PathGen(self.config.OPENROUTE_API_KEY)
-        album_length = album.get_album_length(album_name)
-        link = path_gen.generate_path("4050 17th St San Francisco, CA", album_length)
-        print(link)
-        print(album._time_format(album_length))
-        return link
+    def run(self, album_name: str, start_address: str):
+        try:
+            length_ms = self.album_length.get_album_length(album_name)
+
+            length = self.album_length._time_format(length_ms)
+
+            maps_url = self.path_gen.generate_path(start_address, length_ms)
+
+            walking_speed_kmh = 2.5
+            distance_km = (length_ms / 3_600_000) * walking_speed_kmh
+
+            print(distance_km)
+
+            return {
+                "album_name": album_name,
+                "length_minutes": length,
+                "distance_km": round(distance_km, 2),
+                "maps_url": maps_url,
+            }
+        except Exception as e:
+            logger.error(f"Error processing request: {str(e)}")
+            raise e
