@@ -57,3 +57,22 @@ async def search_albums(request: Request, query: str):
         return JSONResponse({"results": results})
     except Exception as e:
         return JSONResponse({"results": [], "error": str(e)}, status_code=400)
+
+
+@router.get("/maps_config")
+async def maps_config(request: Request):
+    app = request.state.app
+    key = None
+
+    if getattr(app, "config", None):
+        key = getattr(app.config, "GOOGLE_MAPS_API_KEY", None)
+
+    if not key:
+        key = os.getenv("GOOGLE_MAPS_API_KEY")
+
+    return JSONResponse(
+        {
+            "google_maps_api_key": key or "",
+            "places_autocomplete_enabled": bool(key),
+        }
+    )
