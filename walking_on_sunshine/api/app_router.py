@@ -27,6 +27,9 @@ async def generate_route(request: Request, album_name: str, start_address: str):
                 "length_minutes": result["length_minutes"],
                 "distance_km": result["distance_km"],
                 "maps_url": result["maps_url"],
+                "start_address": result.get("start_address", start_address),
+                "route_preview": result.get("route_preview", []),
+                "map_embed_html": result.get("map_embed_html"),
             }
         )
     except Exception as e:

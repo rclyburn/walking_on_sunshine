@@ -20,7 +20,9 @@ class App:
 
             length = self.album_length._time_format(length_ms)
 
-            maps_url = self.path_gen.generate_path(start_address, length_ms)
+            maps_url, normalized_address, preview_coords, map_embed_html = self.path_gen.generate_path(
+                start_address, length_ms
+            )
 
             walking_speed_kmh = 2.5
             distance_km = (length_ms / 3_600_000) * walking_speed_kmh
@@ -32,6 +34,9 @@ class App:
                 "length_minutes": length,
                 "distance_km": round(distance_km, 2),
                 "maps_url": maps_url,
+                "start_address": normalized_address,
+                "route_preview": preview_coords,
+                "map_embed_html": map_embed_html,
             }
         except Exception as e:
             logger.error(f"Error processing request: {str(e)}")

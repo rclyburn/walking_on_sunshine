@@ -67,6 +67,9 @@ def test_get_maps_url_lat_lon_formatting():
 
 @patch("walking_on_sunshine.app.path_gen.PathGen._get_coords_from_addr")
 @patch("walking_on_sunshine.app.path_gen.PathGen._get_maps_url")
+@patch("walking_on_sunshine.app.path_gen.PathGen._build_folium_map")
+@patch("walking_on_sunshine.app.path_gen.PathGen._get_maps_url")
+@patch("walking_on_sunshine.app.path_gen.PathGen._get_coords_from_addr")
 @pytest.mark.parametrize(
     "album_ms,expected_m",
     [
@@ -74,14 +77,78 @@ def test_get_maps_url_lat_lon_formatting():
         (60 * 60 * 1000, 2500.0),
     ],
 )
-def test_generate_path_distance_conversion(mock_get_maps_url, mock_get_coords_from_addr, album_ms, expected_m):
+def test_generate_path_distance_conversion(mock_get_coords_from_addr, mock_get_maps_url, mock_map, album_ms, expected_m):
     mock_get_coords_from_addr.return_value = [[-122.4, 37.78], [-122.41, 37.79]]
     mock_get_maps_url.return_value = "https://www.google.com/maps/dir/37.78,-122.4/37.79,-122.41/"
+    mock_map.return_value = "data:text/html;base64,abc"
 
     pg = PathGen(key="dummy")
-    url = pg.generate_path("Somewhere", album_ms)
+    url, resolved, preview, map_html = pg.generate_path("Somewhere", album_ms)
 
     assert url.startswith("https://www.google.com/maps/dir/")
+    assert resolved == "Somewhere"
+    assert preview == [
+        {"lat": 37.78, "lon": -122.4},
+        {"lat": 37.79, "lon": -122.41},
+    ]
+    assert map_html == "data:text/html;base64,abc"
     args, _ = mock_get_coords_from_addr.call_args
     assert args[0] == "Somewhere"
     assert math.isclose(args[1], expected_m, rel_tol=1e-9)
+
+
+@patch("walking_on_sunshine.app.path_gen.PathGen._build_folium_map")
+@patch("walking_on_sunshine.app.path_gen.PathGen._get_maps_url")
+@patch("walking_on_sunshine.app.path_gen.PathGen._get_coords_from_addr")
+def test_generate_path_with_coordinate_string_uses_reverse_geocode(
+    mock_get_coords_from_addr, mock_get_maps_url, mock_map, mock_client
+):
+    mock_client.pelias_reverse.return_value = {
+        "features": [
+            {
+                "properties": {
+                    "label": "1 Market St, San Francisco, CA",
+                }
+            }
+        ]
+    }
+    mock_get_coords_from_addr.return_value = [[-122.4, 37.78], [-122.41, 37.79]]
+    mock_get_maps_url.return_value = "https://www.google.com/maps/dir/37.78,-122.4/37.79,-122.41/"
+    mock_map.return_value = "data:text/html;base64,abc"
+
+    pg = PathGen(key="dummy")
+    url, resolved, preview, map_html = pg.generate_path("37.78,-122.41", 30 * 60 * 1000)
+
+    assert resolved == "1 Market St, San Francisco, CA"
+    assert preview == [
+        {"lat": 37.78, "lon": -122.4},
+        {"lat": 37.79, "lon": -122.41},
+    ]
+    assert map_html == "data:text/html;base64,abc"
+    mock_client.pelias_reverse.assert_called_once()
+    mock_get_coords_from_addr.assert_called_once()
+    args, _ = mock_get_coords_from_addr.call_args
+    assert args[0] == "1 Market St, San Francisco, CA"
+
+
+@patch("walking_on_sunshine.app.path_gen.PathGen._build_folium_map")
+@patch("walking_on_sunshine.app.path_gen.PathGen._get_maps_url")
+@patch("walking_on_sunshine.app.path_gen.PathGen._get_coords_from_list")
+def test_generate_path_with_coordinate_string_falls_back_without_reverse(
+    mock_get_coords_from_list, mock_get_maps_url, mock_map, mock_client
+):
+    mock_client.pelias_reverse.return_value = {}
+    mock_get_coords_from_list.return_value = [[-122.4, 37.78], [-122.41, 37.79]]
+    mock_get_maps_url.return_value = "https://www.google.com/maps/dir/37.78,-122.4/37.79,-122.41/"
+    mock_map.return_value = "data:text/html;base64,abc"
+
+    pg = PathGen(key="dummy")
+    url, resolved, preview, map_html = pg.generate_path("37.78,-122.41", 30 * 60 * 1000)
+
+    assert resolved == "37.78,-122.41"
+    assert preview == [
+        {"lat": 37.78, "lon": -122.4},
+        {"lat": 37.79, "lon": -122.41},
+    ]
+    assert map_html == "data:text/html;base64,abc"
+    mock_get_coords_from_list.assert_called_once_with([[-122.41, 37.78]], pytest.approx(1250.0))

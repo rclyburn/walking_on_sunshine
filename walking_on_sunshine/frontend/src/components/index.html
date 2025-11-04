@@ -29,18 +29,49 @@
 
     <main>
         <section class="card search-card">
+            <div class="stepper" id="stepper" aria-label="Setup progress">
+                <div class="step active" data-step="1">
+                    <span class="step-number">1</span>
+                    <span class="step-label">Choose album</span>
+                </div>
+                <div class="step" data-step="2">
+                    <span class="step-number">2</span>
+                    <span class="step-label">Pick location</span>
+                </div>
+            </div>
+            <div class="progress-track" aria-hidden="true">
+                <div class="progress-bar" id="stepProgress"></div>
+            </div>
             <form id="searchForm" class="search-form" novalidate>
-                <label for="albumSearch">Album</label>
-                <div class="dropdown-container" role="combobox" aria-expanded="false" aria-owns="albumDropdown">
-                    <input type="text" id="albumSearch" autocomplete="off" placeholder="Enter album name…"
-                        aria-autocomplete="list" aria-controls="albumDropdown">
-                    <div id="albumDropdown" class="dropdown" role="listbox"></div>
+                <div class="step-panel" id="albumStep">
+                    <label for="albumSearch">Album</label>
+                    <div class="dropdown-container" role="combobox" aria-expanded="false" aria-owns="albumDropdown">
+                        <input type="text" id="albumSearch" autocomplete="off" placeholder="Enter album name…"
+                            aria-autocomplete="list" aria-controls="albumDropdown">
+                        <div id="albumDropdown" class="dropdown" role="listbox"></div>
+                    </div>
+                    <div id="albumPreview" class="album-preview" aria-live="polite" hidden>
+                        <div class="album-art-frame">
+                            <div class="album-art-card" id="albumArtCard">
+                                <div class="album-art-face album-art-face--front" id="albumArtFront">Album</div>
+                                <div class="album-art-face album-art-face--back" id="albumArtBack"></div>
+                                <img id="albumArt" alt="" class="album-art is-placeholder" hidden>
+                            </div>
+                        </div>
+                        <div class="album-preview-text">
+                            <p class="eyebrow">Selected album</p>
+                            <h3 id="albumPreviewTitle"></h3>
+                            <p id="albumPreviewArtist"></p>
+                        </div>
+                    </div>
                 </div>
 
-                <label for="addressSearch">Starting address</label>
-                <div class="address-row">
-                    <input type="text" id="addressSearch" placeholder="Enter starting address…" autocomplete="off">
-                    <button type="button" id="useLocationBtn" class="secondary">Use my location</button>
+                <div class="step-panel" id="locationStep" hidden>
+                    <label for="addressSearch">Starting address</label>
+                    <div class="address-row">
+                        <input type="text" id="addressSearch" placeholder="Enter starting address…" autocomplete="off">
+                        <button type="button" id="useLocationBtn" class="secondary">Use my location</button>
+                    </div>
                 </div>
 
                 <div class="actions">
