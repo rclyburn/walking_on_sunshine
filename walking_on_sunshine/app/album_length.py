@@ -46,21 +46,34 @@ class AlbumLength:
 
         return tracks
 
-    def get_album_length(self, album_name: str):
-        """
-        CLI command to fetch and display the total length of a Spotify album.
-        Prompts the user for an album name, searches Spotify, and prints each track name and the total album duration.
-        """
-
-        album_id = self._search_query(album_name=album_name)
+    def get_album_details(self, album_name: str, album_id: str | None = None) -> dict:
+        if not album_id:
+            album_id = self._search_query(album_name=album_name)
+        album = self.sp.album(album_id)
 
         tracks = self._get_tracks(album_id=album_id)
+        total_ms = sum(item.get("duration_ms", 0) for item in tracks)
 
-        album_duration = 0
+        release_date = album.get("release_date") or ""
+        release_year = release_date.split("-")[0] if release_date else None
 
-        # Iterate through all tracks, print their names, and sum their durations
-        for item in tracks:
-            duration = item["duration_ms"]
-            album_duration += duration
+        images = album.get("images") or []
+        image_url = images[0]["url"] if images else None
 
-        return album_duration
+        artists = album.get("artists") or []
+        artist_name = artists[0]["name"] if artists else ""
+
+        return {
+            "id": album_id,
+            "name": album.get("name", album_name),
+            "artist": artist_name,
+            "artists": [artist.get("name") for artist in artists if artist.get("name")],
+            "total_ms": total_ms,
+            "track_count": album.get("total_tracks"),
+            "release_date": release_date,
+            "release_year": release_year,
+            "image_url": image_url,
+        }
+
+    def get_album_length(self, album_name: str) -> int:
+        return self.get_album_details(album_name)["total_ms"]

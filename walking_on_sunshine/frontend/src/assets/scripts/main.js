@@ -194,6 +194,26 @@ function triggerAlbumFlip(shouldFlip) {
     albumArtCard.classList.add('is-flipped');
 }
 
+function pickBestAddress(results) {
+    if (!Array.isArray(results) || !results.length) return null;
+    const priority = new Set([
+        'street_address',
+        'premise',
+        'subpremise',
+        'route',
+        'intersection',
+        'neighborhood',
+    ]);
+    for (const candidate of results) {
+        const types = candidate?.types || [];
+        if (types.some((t) => priority.has(t))) {
+            return candidate.formatted_address || candidate.name || null;
+        }
+    }
+    const first = results[0];
+    return first?.formatted_address || first?.name || null;
+}
+
 function renderRoutePreview(containerId, coords) {
     const container = document.getElementById(containerId);
     if (!container) return;
@@ -273,6 +293,36 @@ function renderRoutePreview(containerId, coords) {
   `;
 }
 
+function setupCopyRouteButton(url) {
+    const btn = resultDiv.querySelector('.copy-link-btn');
+    if (!btn) return;
+    const routeUrl = btn.dataset.route || url;
+    const handleClick = async () => {
+        if (!navigator.clipboard) {
+            alert('Copy not supported on this browser');
+            return;
+        }
+        const originalText = btn.textContent;
+        try {
+            await navigator.clipboard.writeText(routeUrl);
+            btn.textContent = 'Copied!';
+            btn.classList.add('copied');
+            setTimeout(() => {
+                btn.textContent = originalText;
+                btn.classList.remove('copied');
+            }, 1600);
+        } catch (copyErr) {
+            console.error('Failed to copy link', copyErr);
+            btn.textContent = 'Copy failed';
+            setTimeout(() => {
+                btn.textContent = originalText;
+            }, 2000);
+        }
+    };
+
+    btn.onclick = handleClick;
+}
+
 function resetAlbumSelection({ keepInput = true } = {}) {
     selectedAlbum = null;
     if (!keepInput && albumInput) albumInput.value = '';
@@ -280,6 +330,8 @@ function resetAlbumSelection({ keepInput = true } = {}) {
         albumPreview.hidden = true;
         albumPreview.classList.remove('pop-in');
     }
+    if (albumPreviewTitle) albumPreviewTitle.textContent = '';
+    if (albumPreviewArtist) albumPreviewArtist.textContent = '';
     albumArtCard?.classList.remove('is-flipped');
     if (albumArt) {
         albumArt.setAttribute('hidden', '');
@@ -472,12 +524,31 @@ async function initAddressAutocomplete() {
 addrInput?.addEventListener('focus', () => { initAddressAutocomplete(); });
 
 // Use my location
-useLocBtn.addEventListener('click', () => {
+useLocBtn.addEventListener('click', async () => {
     if (!navigator.geolocation) return alert('Geolocation not supported');
-    navigator.geolocation.getCurrentPosition((pos) => {
+    navigator.geolocation.getCurrentPosition(async (pos) => {
         const { latitude, longitude } = pos.coords;
-        addrInput.value = `${latitude},${longitude}`;
-    }, () => alert('Could not get location'));
+
+        const loaded = await ensurePlacesLibrary();
+        if (!loaded || !window.google?.maps?.Geocoder) {
+            addrInput.value = `${latitude},${longitude}`;
+            return;
+        }
+
+        const geocoder = new google.maps.Geocoder();
+        geocoder.geocode({ location: { lat: latitude, lng: longitude } }, (results, status) => {
+            if (status === 'OK' && results?.length) {
+                const formatted = pickBestAddress(results);
+                addrInput.value = formatted || `${latitude},${longitude}`;
+                return;
+            }
+            addrInput.value = `${latitude},${longitude}`;
+        });
+    }, () => alert('Could not get location'), {
+        enableHighAccuracy: true,
+        maximumAge: 30000,
+        timeout: 15000,
+    });
 });
 
 // Main submit handler
@@ -503,10 +574,14 @@ async function searchAlbum() {
     resultDiv.style.display = 'block';
     resultDiv.innerHTML = `<div class="loading">Generating route…</div>`;
 
+    const effectiveAlbumName = selectedAlbum?.name || albumName;
     const params = new URLSearchParams({
-        album_name: albumName,
+        album_name: effectiveAlbumName,
         start_address: startAddress,
     });
+    if (selectedAlbum?.id) {
+        params.set('album_id', selectedAlbum.id);
+    }
 
     submitBtn.disabled = true;
     try {
@@ -522,21 +597,45 @@ async function searchAlbum() {
         }
 
         // Validate & format
-        const name = data.album_name ?? albumName;
+        const name = data.album_name ?? effectiveAlbumName;
         const artist = data.artist || '';
         const lengthMin = Number(data.length_minutes);
+        const albumDurationLabel = data.album_duration_label || '';
         const distanceKm = Number(data.distance_km);
         const mapsUrl = data.maps_url || '#';
+        const hasMapsLink = !!mapsUrl && mapsUrl !== '#';
         const resolvedStartAddress = (data.start_address && String(data.start_address).trim()) || startAddress;
+        const trackCount = Number(data.track_count);
+        const releaseYear = data.release_year ? String(data.release_year) : '';
 
         if (addrInput && resolvedStartAddress) {
             addrInput.value = resolvedStartAddress;
         }
 
+        if (data.album_image_url && albumArt) {
+            albumArt.src = data.album_image_url;
+            albumArt.alt = `${name} album art`;
+            albumArt.classList.remove('is-placeholder');
+            albumArt.removeAttribute('hidden');
+            albumArtBack?.style.setProperty('background-image', `url("${data.album_image_url}")`);
+            applyAlbumAccent(data.album_image_url);
+        }
+
+        if (albumPreviewTitle && name) {
+            albumPreviewTitle.textContent = name;
+        }
+
+        if (albumPreviewArtist) {
+            albumPreviewArtist.textContent = artist ? `by ${artist}` : '';
+        }
+
         const chips = [];
-        if (!Number.isNaN(lengthMin)) chips.push(`⏱️ ${lengthMin} min`);
-        if (!Number.isNaN(distanceKm)) chips.push(`🚶 ${distanceKm} km`);
-        if (artist) chips.push(`🎧 ${escapeHTML(artist)}`);
+
+        const detailsExtras = [];
+        if (releaseYear) detailsExtras.push(`<span class="album-detail">${escapeHTML(releaseYear)}</span>`);
+        if (!Number.isNaN(trackCount) && trackCount > 0) {
+            detailsExtras.push(`<span class="album-detail">${escapeHTML(trackCount.toString())} tracks</span>`);
+        }
 
         const chipMarkup = chips.map(c => `<span class="chip">${escapeHTML(c)}</span>`).join('');
         const hasDistance = !Number.isNaN(distanceKm);
@@ -561,19 +660,34 @@ async function searchAlbum() {
             mapSection = `<div class="map-preview-fallback">Map preview unavailable</div>`;
         }
 
+        const albumHeader = `
+      <div class="album-header">
+        <div class="album-header__info">
+          <h2>${escapeHTML(name)}</h2>
+          ${detailsExtras.length ? `<div class="album-details">${detailsExtras.join('<span class="dot">•</span>')}</div>` : ''}
+        </div>
+      </div>`;
+
         resultDiv.innerHTML = `
-      <h2>${escapeHTML(name)}</h2>
+      ${albumHeader}
       <div class="stat-row">
         ${chipMarkup}
       </div>
       ${mapSection}
       <p>Start: ${escapeHTML(resolvedStartAddress)}</p>
-      ${hasDistance || hasLength ? `<p>${hasDistance ? `${escapeHTML(distanceKm.toFixed(2))} km` : ''}${hasDistance && hasLength ? ' • ' : ''}${hasLength ? `Approx ${escapeHTML(lengthMin.toFixed(0))} min` : ''}</p>` : ''}
-      <p><a href="${encodeURI(mapsUrl)}" target="_blank" rel="noopener" class="maps-link">View Route in Google Maps</a></p>
+      ${hasDistance || hasLength ? `<p>${hasDistance ? `${escapeHTML(distanceKm.toFixed(2))} km` : ''}${hasDistance && hasLength ? ' • ' : ''}${hasLength ? `Approx ${escapeHTML(Math.round(lengthMin))} min` : ''}</p>` : ''}
+      ${hasMapsLink ? `<div class="result-actions">
+        <a href="${encodeURI(mapsUrl)}" target="_blank" rel="noopener" class="maps-link">View Route in Google Maps</a>
+        <button type="button" class="secondary copy-link-btn" data-route="${escapeHTML(mapsUrl)}">Copy route link</button>
+      </div>` : ''}
     `;
 
         if (!mapEmbedHtml && canRenderMap) {
             requestAnimationFrame(() => renderRoutePreview('mapPreview', previewCoords));
+        }
+
+        if (hasMapsLink) {
+            setupCopyRouteButton(mapsUrl);
         }
     } catch (err) {
         resultDiv.innerHTML = `<p>Something went wrong. Please try again.</p>`;

@@ -14,17 +14,23 @@ async def serve_frontend():
 
 
 @router.get("/generate_route")
-async def generate_route(request: Request, album_name: str, start_address: str):
+async def generate_route(request: Request, album_name: str, start_address: str, album_id: str | None = None):
     print(f"Received request with album_name: {album_name}, start_address: {start_address}")
     app = request.state.app
     try:
-        result = app.run(album_name, start_address)
+        result = app.run(album_name, start_address, album_id)
         print(f"Success response: {result}")
         return JSONResponse(
             {
                 "status": "success",
                 "album_name": result["album_name"],
+                "album_id": result.get("album_id", album_id),
+                "artist": result.get("artist"),
                 "length_minutes": result["length_minutes"],
+                "album_duration_label": result.get("album_duration_label"),
+                "track_count": result.get("track_count"),
+                "release_year": result.get("release_year"),
+                "album_image_url": result.get("album_image_url"),
                 "distance_km": result["distance_km"],
                 "maps_url": result["maps_url"],
                 "start_address": result.get("start_address", start_address),

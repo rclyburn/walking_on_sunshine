@@ -132,12 +132,12 @@ class PathGen:
 
             fmap = folium.Map(location=midpoint, zoom_start=13, control_scale=True, tiles="cartodbpositron")
             folium.PolyLine(latlngs, weight=6, opacity=0.85, color="#4f46e5").add_to(fmap)
-            folium.CircleMarker(
-                latlngs[0], radius=6, color="#fff", weight=2, fill=True, fill_color="#4f46e5"
-            ).add_to(fmap)
-            folium.CircleMarker(
-                latlngs[-1], radius=6, color="#fff", weight=2, fill=True, fill_color="#4338ca"
-            ).add_to(fmap)
+            folium.CircleMarker(latlngs[0], radius=6, color="#fff", weight=2, fill=True, fill_color="#4f46e5").add_to(
+                fmap
+            )
+            folium.CircleMarker(latlngs[-1], radius=6, color="#fff", weight=2, fill=True, fill_color="#4338ca").add_to(
+                fmap
+            )
 
             fmap.fit_bounds(latlngs, padding=(30, 30))
 
@@ -146,9 +146,7 @@ class PathGen:
         except Exception:
             return None
 
-    def generate_path(
-        self, location: str, album_length: int
-    ) -> tuple[str, str, list[dict[str, float]], str | None]:
+    def generate_path(self, location: str, album_length: int) -> tuple[str, str, list[dict[str, float]], str | None]:
         walking_speed_kmh = 2.5
         distance_km = (album_length / 3_600_000) * walking_speed_kmh
         distance_m = distance_km * 1000

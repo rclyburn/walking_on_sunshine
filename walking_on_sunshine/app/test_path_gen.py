@@ -65,8 +65,6 @@ def test_get_maps_url_lat_lon_formatting():
     assert url.rstrip("/").endswith("37.783,-122.403")
 
 
-@patch("walking_on_sunshine.app.path_gen.PathGen._get_coords_from_addr")
-@patch("walking_on_sunshine.app.path_gen.PathGen._get_maps_url")
 @patch("walking_on_sunshine.app.path_gen.PathGen._build_folium_map")
 @patch("walking_on_sunshine.app.path_gen.PathGen._get_maps_url")
 @patch("walking_on_sunshine.app.path_gen.PathGen._get_coords_from_addr")
@@ -77,7 +75,9 @@ def test_get_maps_url_lat_lon_formatting():
         (60 * 60 * 1000, 2500.0),
     ],
 )
-def test_generate_path_distance_conversion(mock_get_coords_from_addr, mock_get_maps_url, mock_map, album_ms, expected_m):
+def test_generate_path_distance_conversion(
+    mock_get_coords_from_addr, mock_get_maps_url, mock_map, album_ms, expected_m
+):
     mock_get_coords_from_addr.return_value = [[-122.4, 37.78], [-122.41, 37.79]]
     mock_get_maps_url.return_value = "https://www.google.com/maps/dir/37.78,-122.4/37.79,-122.41/"
     mock_map.return_value = "data:text/html;base64,abc"

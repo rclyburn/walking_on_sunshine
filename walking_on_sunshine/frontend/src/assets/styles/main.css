@@ -528,6 +528,33 @@ button.secondary:hover {
     color: var(--muted);
 }
 
+.album-meta {
+    display: flex;
+    gap: .5rem;
+    align-items: center;
+    margin: .5rem 0;
+    color: var(--muted);
+    font-weight: 600;
+}
+
+.result-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .6rem;
+    align-items: center;
+    margin-top: 1rem;
+}
+
+.copy-link-btn.copied {
+    background: var(--accent);
+    color: #fff;
+    border-color: transparent;
+}
+
+.result-actions .maps-link {
+    margin-top: 0;
+}
+
 .maps-link {
     display: inline-block;
     padding: .6rem .9rem;
@@ -612,4 +639,34 @@ footer {
     .search-form {
         gap: .75rem;
     }
+}
+.album-header {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.album-header__info {
+    display: flex;
+    flex-direction: column;
+    gap: .3rem;
+}
+
+.album-details {
+    display: flex;
+    gap: .5rem;
+    align-items: center;
+    color: var(--muted);
+    font-weight: 600;
+}
+
+.album-details .dot {
+    color: var(--muted);
+}
+
+.album-detail {
+    background: rgba(79, 70, 229, .1);
+    border-radius: 999px;
+    padding: .15rem .6rem;
+    font-size: .85rem;
 }
