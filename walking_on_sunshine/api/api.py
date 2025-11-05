@@ -60,6 +60,11 @@ class API:
         async def serve_frontend():
             return FileResponse(os.path.join(frontend_path, "components/index.html"))
 
+        # Serve index.html at root
+        @self.fast_api.get("/")
+        async def serve_frontend():
+            return FileResponse(os.path.join(frontend_path, "components/index.html"))
+
     def run(self):
         port = int(os.environ.get("PORT", 8000))
         uvicorn.run(self.fast_api, host="0.0.0.0", port=port, log_level="info")
