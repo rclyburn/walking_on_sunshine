@@ -1,36 +1,93 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Walking on Sunshine</title>
-    <link rel="stylesheet" href="/static/styles/main.css?v=20251021">
+
+    <!-- Fonts & basic meta -->
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css?family=Inter:400,600&display=swap" rel="stylesheet">
+
+    <!-- Social sharing -->
+    <meta property="og:title" content="Walking on Sunshine" />
+    <meta property="og:description" content="Generate a walking route that matches your favorite album’s length." />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="/static/og.jpg" />
+    <meta name="theme-color" content="#4f46e5" />
+
+    <link rel="icon" href="/static/favicon.ico" />
+    <link rel="stylesheet" href="/static/styles/main.css?v=20251029" />
 </head>
+
 <body>
     <header>
         <h1>🌞 Walking on Sunshine</h1>
-        <p class="subtitle">Find a walking route that matches your favorite album's length</p>
+        <p class="subtitle">Generate a walking route that matches your album’s play time.</p>
     </header>
+
     <main>
         <section class="card search-card">
-            <h2>Search for an Album</h2>
-            <div class="search-form">
-                <div class="dropdown-container">
-                    <input type="text" id="albumSearch" placeholder="Enter album name...">
-                    <div id="albumDropdown" class="dropdown"></div>
+            <div class="stepper" id="stepper" aria-label="Setup progress">
+                <div class="step active" data-step="1">
+                    <span class="step-number">1</span>
+                    <span class="step-label">Choose album</span>
                 </div>
-                <input type="text" id="addressSearch" placeholder="Enter starting address...">
-                <button onclick="searchAlbum()">Generate Route</button>
+                <div class="step" data-step="2">
+                    <span class="step-number">2</span>
+                    <span class="step-label">Pick location</span>
+                </div>
             </div>
+            <div class="progress-track" aria-hidden="true">
+                <div class="progress-bar" id="stepProgress"></div>
+            </div>
+            <form id="searchForm" class="search-form" novalidate>
+                <div class="step-panel" id="albumStep">
+                    <label for="albumSearch">Album</label>
+                    <div class="dropdown-container" role="combobox" aria-expanded="false" aria-owns="albumDropdown">
+                        <input type="text" id="albumSearch" autocomplete="off" placeholder="Enter album name…"
+                            aria-autocomplete="list" aria-controls="albumDropdown">
+                        <div id="albumDropdown" class="dropdown" role="listbox"></div>
+                    </div>
+                    <div id="albumPreview" class="album-preview" aria-live="polite" hidden>
+                        <div class="album-art-frame">
+                            <div class="album-art-card" id="albumArtCard">
+                                <div class="album-art-face album-art-face--front" id="albumArtFront">Album</div>
+                                <div class="album-art-face album-art-face--back" id="albumArtBack"></div>
+                                <img id="albumArt" alt="" class="album-art is-placeholder" hidden>
+                            </div>
+                        </div>
+                        <div class="album-preview-text">
+                            <p class="eyebrow">Selected album</p>
+                            <h3 id="albumPreviewTitle"></h3>
+                            <p id="albumPreviewArtist"></p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="step-panel" id="locationStep" hidden>
+                    <label for="addressSearch">Starting address</label>
+                    <div class="address-row">
+                        <input type="text" id="addressSearch" placeholder="Enter starting address…" autocomplete="off">
+                        <button type="button" id="useLocationBtn" class="secondary">Use my location</button>
+                    </div>
+                </div>
+
+                <div class="actions">
+                    <button type="submit" id="submitBtn">Generate Route</button>
+                </div>
+            </form>
         </section>
-        <section class="card result-card" id="result" style="display:none;">
-            <!-- Results will be displayed here -->
-        </section>
+
+        <section class="card result-card" id="result" aria-live="polite" style="display:none;"></section>
     </main>
+
     <footer>
         <p>Made by Reid Clyburn</p>
     </footer>
-    <script src="/static/scripts/main.js?v=20251021"></script>
+
+    <script src="/static/scripts/main.js?v=20251029" defer></script>
 </body>
+
 </html>
