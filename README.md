@@ -4,31 +4,33 @@ Walking on Sunshine is a creative web application that generates walking routes 
 
 ## 🎯 Features
 
-- **Album Length Detection**: Integrates with Spotify's API to fetch precise album lengths
-- **Dynamic Route Generation**: Creates walking routes that match album durations using OpenRoute Service
-- **Interactive UI**: Modern, responsive interface with real-time album search suggestions
-- **Smart Path Generation**: Automatically calculates circular routes that bring you back to your starting point
+- **Spotify-powered lookup**: search, autocomplete, and lock to the exact album (ID + metadata) before running
+- **Album insight panel**: track count, release year, duration label, artist, and cover art at a glance
+- **Route generator**: OpenRoute Service produces a looping walk that matches the album play time
+- **Map preview**: Folium embed (with SVG fallback) shows the full path and start/finish markers
+- **Copyable directions**: one-click button copies the Google Maps link to your clipboard
+- **Location tools**: Places autocomplete, reverse geocode “Use my location,” and manual entry options
 
 ## 🛠️ Technology Stack
 
 ### Backend (Python)
-- FastAPI for high-performance API endpoints
-- Clean architecture with separation of concerns
-- Dependency injection for configuration management
-- Custom logging system for debugging and monitoring
-- Unit testing with pytest
+- FastAPI service exposing `/search_albums`, `/generate_route`, `/maps_config`
+- Spotify client for album details (duration, tracks, release year, artwork)
+- OpenRoute Service client + Folium map rendering for walking loops
+- Structured logging, type hints, and pytest coverage for path/album logic
 
 ### Frontend
-- Pure HTML5, CSS3, and Vanilla JavaScript
-- Modern, responsive design
-- Real-time search with dropdown suggestions
-- Cache-busting for static assets
-- Mobile-first approach
+- Vanilla HTML/CSS/JS served statically by FastAPI
+- Debounced Spotify search with keyboard-aware dropdown
+- Two-step UX (album → location) with animated transitions
+- Google Places autocomplete + reverse geocoding for “Use my location”
+- Route result card with stats, map embed, and clipboard-friendly actions
 
 ### APIs and Services
-- Spotify Web API for music data
-- OpenRoute Service for path generation
-- Custom rate limiting and error handling
+- Spotify Web API (albums, tracks, images, popularity)
+- OpenRoute Service (directions, reverse geocode fallback)
+- Folium (Leaflet map HTML embeddable in frontend)
+- Google Maps Places (autocomplete + geocoding when API key provided)
 
 ## 🏗️ Architecture
 
@@ -104,24 +106,35 @@ This project demonstrates proficiency in:
 ```bash
 # Clone the repository
 git clone https://github.com/rclyburn/walking_on_sunshine.git
-
-# Install dependencies
 cd walking_on_sunshine
+
+# Install dependencies (uv recommended)
+uv sync
+# or, if you prefer pip
 pip install -e .
 
-# Set up environment variables
-# Create a .env file with:
-SPOTIFY_CLIENT_ID=your_spotify_client_id
-SPOTIFY_CLIENT_SECRET=your_spotify_client_secret
-OPENROUTE_API_KEY=your_openroute_api_key
+# Provide credentials (.env or exported variables)
+export SPOTIFY_CLIENT_ID=your_spotify_client_id
+export SPOTIFY_CLIENT_SECRET=your_spotify_client_secret
+export OPENROUTE_API_KEY=your_openroute_api_key
+# Optional: unlock Places autocomplete + reverse geocode
+export GOOGLE_MAPS_API_KEY=your_google_maps_api_key
 
-# Run the application
+# Launch the server
 uv run main serve
+# App available at http://localhost:8000
 ```
 
-## 👤 About the Developer
+## 🎧 Using the App
 
-Created by Reid Clyburn as a demonstration of development capabilities.
+1. Start typing an album name – use the dropdown (arrow keys + Enter or mouse) to pick the exact record.
+2. Either enter a starting address or click **Use my location** (reverse geocodes to a street address).
+3. Hit **Generate Route**. The result card shows album stats, distance, and a map preview.
+4. Copy the Google Maps link or open it in a new tab to follow the generated walk.
+
+## 💼 About the Project
+
+Walking on Sunshine is a portfolio application created by Reid Clyburn to showcase full-stack development, third-party API orchestration, and polished UX. Feedback and collaboration are welcome.
 
 ## 📝 License
 

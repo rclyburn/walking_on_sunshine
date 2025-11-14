@@ -528,15 +528,6 @@ button.secondary:hover {
     color: var(--muted);
 }
 
-.album-meta {
-    display: flex;
-    gap: .5rem;
-    align-items: center;
-    margin: .5rem 0;
-    color: var(--muted);
-    font-weight: 600;
-}
-
 .result-actions {
     display: flex;
     flex-wrap: wrap;

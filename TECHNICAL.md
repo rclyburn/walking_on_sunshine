@@ -36,21 +36,23 @@ Main application orchestrator that:
 - Initializes core services
 - Handles business logic coordination
 - Manages error handling
-- Processes album and route generation
+- Processes album and route generation (accepts Spotify album ID when available)
+- Aggregates rich album metadata for API consumers
 
 #### `AlbumLength` (app/album_length.py)
 Spotify integration service that:
 - Manages Spotify API authentication
-- Retrieves album metadata
-- Calculates total album duration
-- Handles API rate limiting
+- Retrieves album metadata (duration, tracks, release info, artwork)
+- Supports lookup by album ID for deterministic selections
+- Calculates total album duration and formatted labels
+- Handles API pagination and rate limiting
 
 #### `PathGen` (app/path_gen.py)
 Route generation service that:
 - Integrates with OpenRoute Service
-- Calculates optimal walking paths
-- Ensures route circularity
-- Adapts routes to album length
+- Calculates looped walking paths sized to the album duration
+- Down-samples coordinates for frontend previews
+- Generates Folium HTML map embeds as the primary preview medium
 
 ## Frontend Architecture
 
@@ -68,18 +70,18 @@ frontend/
 ```
 
 ### JavaScript Architecture
-- Event-driven architecture
-- Async/await for API calls
-- Debounced search implementation
-- DOM manipulation utilities
-- Error handling and user feedback
+- Event-driven module in `main.js` (no framework)
+- Debounced Spotify search with keyboard-accessible dropdown
+- `selectedAlbum` state persists Spotify IDs for deterministic backend calls
+- Two-step workflow controller (album → location) with animated transitions
+- Integration helpers for Google Places Autocomplete, reverse geocode, and clipboard copy
+- Fallback SVG renderer when Folium map HTML is unavailable
 
 ### CSS Architecture
-- Mobile-first responsive design
-- CSS Grid and Flexbox layouts
-- BEM naming convention
-- Modern animations and transitions
-- Efficient selectors and specificity
+- Mobile-first layout using Flexbox/Grid
+- Theming handled via CSS custom properties (accent colour adapts to album art)
+- Animation hooks for dropdowns, step transitions, and album art flip
+- Utility classes for map canvases, metadata chips, and action buttons
 
 ## API Documentation
 
@@ -100,27 +102,34 @@ Returns album search results including:
 
 Query Parameters:
 - `album_name`: Name of the album (string)
-- `start_address`: Starting location address (string)
+- `album_id` (optional): Spotify album ID returned by `/search_albums`
+- `start_address`: Starting location (free-text address or `lat,lon` coordinate pair)
 
 Returns:
-- Album name
-- Route length in minutes
-- Distance in kilometers
-- OpenRoute Service map URL
+- Album name + artist (normalized from Spotify)
+- Album metadata (duration label, track count, release year, artwork URL)
+- Distance in kilometers and Google Maps directions URL
+- Folium map embed (Base64 HTML) and down-sampled route coordinates
+- Normalized start address for display
+
+### Maps Configuration Endpoint
+`GET /maps_config`
+
+Returns Google Maps API availability so the frontend can decide whether to enable Places autocomplete/reverse geocoding.
 
 ## Development Workflow
 
 ### Local Development
-1. Install dependencies
-2. Set up environment variables
-3. Run development server
-4. Access application at localhost:8000
+1. `uv sync` (or `pip install -e .`) to install dependencies
+2. Provide API keys via `.env` (`SPOTIFY_CLIENT_ID/SECRET`, `OPENROUTE_API_KEY`, optional `GOOGLE_MAPS_API_KEY`)
+3. `uv run main serve` to start FastAPI + static frontend
+4. Visit http://localhost:8000
 
 ### Testing
-- Unit tests with pytest
-- Integration tests for API endpoints
-- Frontend testing with browser tools
-- Manual UI/UX testing
+- `make test` for backend/unit coverage (album + path generation)
+- Manual API verification with HTTP clients (e.g., `/generate_route`)
+- Frontend regression checks in Chrome/Firefox + responsive tooling
+- Manual UX verification of autocomplete, map embed, and clipboard actions
 
 ### Deployment
 - Static file optimization
